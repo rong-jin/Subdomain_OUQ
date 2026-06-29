@@ -1,116 +1,130 @@
 # Subdomain OUQ
 
-This repository contains the reference implementation and numerical examples for:
+Reference code and reproduction scripts for the paper:
 
-> Rong Jin and Xingsheng Sun,  
-> **Optimal uncertainty quantification under general moment constraints on input subdomains**,  
-> *Computer Methods in Applied Mechanics and Engineering*, 461, 119177, 2026.  
-> DOI: 10.1016/j.cma.2026.119177
+> Rong Jin and Xingsheng Sun, **Optimal uncertainty quantification under general moment constraints on input subdomains**, *Computer Methods in Applied Mechanics and Engineering*, 461, 119177, 2026. DOI: `10.1016/j.cma.2026.119177`
 
 ## Overview
 
-This code implements an optimal uncertainty quantification (OUQ) framework for systems with statistically independent uncertain inputs characterized by truncated moment constraints on input subdomains.
-
-The implementation converts the original infinite-dimensional optimization problem over admissible probability measures into a finite-dimensional optimization problem over discrete Dirac measures. The constrained moment problem is parameterized by free canonical moments, and the Dirac supports and weights are recovered through the eigendecomposition of a Jacobi matrix. For high-dimensional examples, inverse transform sampling (ITS) is used to reduce the cost of probability-of-failure evaluation.
-
-## Features
-
-- Subdomain-based truncated moment constraints
-- Canonical-moment parameterization
-- Jacobi-matrix eigendecomposition for Dirac supports and weights
-- Exact PoF evaluation for low-dimensional examples
-- ITS-based PoF estimation for high-dimensional examples
-- Differential Evolution optimization for upper and lower OUQ bounds
-- Reproduction scripts for the five numerical examples in the paper
+This repository implements an optimal uncertainty quantification (OUQ) framework for independent uncertain inputs with truncated moment constraints defined on input subdomains. The infinite-dimensional optimization over admissible probability measures is reduced to a finite-dimensional search over Dirac measures. Canonical moments are used to enforce moment constraints, the Jacobi matrix is used to recover Dirac supports and weights, and exact tensor-product summation or inverse transform sampling (ITS) is used to evaluate probabilities of failure.
 
 ## Repository structure
 
 ```text
-src/subdomain_ouq/          Core OUQ implementation
-examples/case1_identity_1d/ 1D identity-function examples
-examples/case2_5d_smooth/   5D nonlinear smooth example
-examples/case3_four_branch/ 2D non-smooth four-branch example
-examples/case4_roof_truss/  8D rare-event roof-truss example
-examples/case5_ballistic_10d/ 10D ballistic-impact example
-results/                    Curated reference results
-tests/                      Basic tests
+Subdomain_OUQ/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── .gitignore
+├── src/subdomain_ouq/              Core reusable OUQ utilities
+├── examples/case1_identity_1d/     One-dimensional identity-function examples
+├── examples/case2_5d_smooth/       Five-dimensional nonlinear smooth example
+├── examples/case3_four_branch/     Two-dimensional four-branch non-smooth example
+├── examples/case4_roof_truss/      Eight-dimensional roof-truss rare-event example
+├── examples/case5_ballistic_10d/   Ten-dimensional ballistic-impact surrogate example
+├── results/                        Curated paper-result CSV files
+└── tests/                          Basic smoke and numerical consistency tests
 ```
+
 ## Installation
 
-Clone the repository:
 ```bash
 git clone https://github.com/rong-jin/Subdomain_OUQ.git
 cd Subdomain_OUQ
-```
-
-Create a Python environment:
-```bash
-conda create -n subdomain-ouq python=3.11
-conda activate subdomain-ouq
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-For the ballistic-impact surrogate model in Case 5, PyTorch is required:
+The scripts work when run from the repository root because each example adds `src/` to `sys.path`.
+
+## Quick checks
+
 ```bash
-pip install torch
+pytest -q
 ```
 
-Quick start
+Plot the bundled curated result CSV files without rerunning the expensive optimizations:
 
-Run the one-dimensional examples:
+```bash
+python examples/case1_identity_1d/plot_case1.py
+python examples/case2_5d_smooth/plot_case2.py
+python examples/case3_four_branch/plot_case3.py
+python examples/case4_roof_truss/plot_case4.py
+python examples/case5_ballistic_10d/plot_case5.py
+```
+
+## Run examples
+
+### Case 1: one-dimensional identity functions
+
 ```bash
 python examples/case1_identity_1d/run_case1.py --dist all --K-list 1 2 4 8 --r-list 0 1 2 3
+python examples/case1_identity_1d/plot_case1.py --summary outputs/case1_identity_1d/case1_bounds.csv --pdfs
 ```
 
-Run the five-dimensional nonlinear smooth example:
+### Case 2: five-dimensional nonlinear smooth problem
+
 ```bash
 python examples/case2_5d_smooth/run_case2.py --K-list 1 2 4 8 --r-list 0 1 2 --n-its 50000
+python examples/case2_5d_smooth/scan_nits.py --K 8 --r 2
+python examples/case2_5d_smooth/plot_case2.py --summary outputs/case2_5d_smooth/ouq_bounds_summary.csv
 ```
 
-Run the two-dimensional four-branch example:
+### Case 3: two-dimensional four-branch problem
+
 ```bash
-python examples/case3_four_branch/run_case3.py --yc 0.0
-python examples/case3_four_branch/run_case3.py --yc 2.0
+python examples/case3_four_branch/run_case3.py --mode grid --yc 0.0 --K-list 1 2 4 8 --r-list 0 1 2
+python examples/case3_four_branch/run_case3.py --mode grid --yc 2.0 --K-list 1 2 4 8 --r-list 0 1 2
+python examples/case3_four_branch/plot_case3.py --summary outputs/case3_four_branch/yc_0/ouq_bounds_summary.csv
 ```
 
-Run the roof-truss rare-event example:
+### Case 4: eight-dimensional roof-truss rare event
+
 ```bash
-python examples/case4_roof_truss/screen_mcdiarmid.py
-python examples/case4_roof_truss/run_case4.py
+python examples/case4_roof_truss/screen_mcdiarmid.py --eta 1.25e5 --exclude-screen-names q,l
+python examples/case4_roof_truss/reference_subset_simulation.py --eta 1.25e5
+python examples/case4_roof_truss/run_case4.py --eta 1.25e5 --active-names q,l,Ac,fc
+python examples/case4_roof_truss/plot_case4.py --summary outputs/case4_roof_truss/ouq_bounds_summary.csv
 ```
 
-Run the ten-dimensional ballistic-impact example:
+Case 4 is computationally expensive. Use smaller `--maxiter`, smaller `--max-exact-atoms`, or the bundled `results/case4_bounds.csv` for quick plotting.
+
+### Case 5: ten-dimensional ballistic impact
+
+A pretrained `forward_model.pth` is included under `examples/case5_ballistic_10d/models/`, so the OUQ runs do not require LS-DYNA.
+
 ```bash
-python examples/case5_ballistic_10d/run_case5.py --yc 0.93
+python examples/case5_ballistic_10d/deploy_forward_model.py --help
+python examples/case5_ballistic_10d/run_case5.py --yc 0.93 --K-list 1 2 4 8 --r-list 0 1 2
 python examples/case5_ballistic_10d/scan_thresholds.py
+python examples/case5_ballistic_10d/plot_case5.py --summary <run-output-dir>/ouq_bounds_summary.csv
 ```
 
-## Numerical examples
+The training script is included for completeness:
 
-The repository reproduces the five examples in the paper:
+```bash
+python examples/case5_ballistic_10d/train_surrogate.py --help
+```
 
-Case	Description	Dimension	Main feature
-Case 1	Identity functions with normal, uniform, Weibull, and bimodal distributions	1	Baseline verification
-Case 2	Nonlinear smooth function	5	ITS and DE convergence
-Case 3	Four-branch non-smooth benchmark	2	Non-smooth and low-probability cases
-Case 4	Roof-truss rare-event problem	8	Active-dimension refinement
-Case 5	Ballistic impact of AZ31B plate	10	Neural-network surrogate model
-Outputs
+It expects the LS-DYNA-generated input/output dataset used for training; the dataset itself is not included.
 
-By default, scripts write generated files to outputs/. These files are not tracked by Git.
+## Curated results
 
-Curated reference results used in the paper are stored in results/.
+The `results/` folder contains lightweight CSV summaries corresponding to the paper examples and appendix tables:
 
-Reproducibility notes
+```text
+results/case1_bounds.csv
+results/case2_bounds.csv
+results/case3_bounds_yc0.csv
+results/case3_bounds_yc2.csv
+results/case4_bounds.csv
+results/case5_bounds.csv
+```
 
-The OUQ optimization uses Differential Evolution and, for high-dimensional problems, inverse transform sampling with common random numbers. Small numerical differences may occur across platforms and random seeds.
+Generated histories, atoms, logs, and figures are written to output folders such as `outputs/`, `ouq_5d_full_grid/`, or timestamped case directories. These runtime outputs are ignored by Git.
 
-The ballistic-impact example uses a pretrained neural-network surrogate model. The original LS-DYNA simulations are not required to run the OUQ example.
-
----
 ## Citation
-
-If you use this code, please cite:
 
 ```bibtex
 @article{jin2026subdomainouq,
@@ -124,7 +138,6 @@ If you use this code, please cite:
 }
 ```
 
----
 ## License
 
 This project is released under the MIT License.
