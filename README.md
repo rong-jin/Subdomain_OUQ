@@ -98,10 +98,12 @@ The OUQ optimization uses Differential Evolution and, for high-dimensional probl
 
 The ballistic-impact example uses a pretrained neural-network surrogate model. The original LS-DYNA simulations are not required to run the OUQ example.
 
+---
 ## Citation
 
 If you use this code, please cite:
 
+```bibtex
 @article{jin2026subdomainouq,
   title   = {Optimal uncertainty quantification under general moment constraints on input subdomains},
   author  = {Jin, Rong and Sun, Xingsheng},
@@ -111,7 +113,9 @@ If you use this code, please cite:
   year    = {2026},
   doi     = {10.1016/j.cma.2026.119177}
 }
+```
 
+---
 ## License
 
 This project is released under the MIT License.
