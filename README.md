@@ -38,43 +38,52 @@ tests/                      Basic tests
 ## Installation
 
 Clone the repository:
-
+```bash
 git clone https://github.com/rong-jin/Subdomain_OUQ.git
 cd Subdomain_OUQ
+```
 
 Create a Python environment:
-
+```bash
 conda create -n subdomain-ouq python=3.11
 conda activate subdomain-ouq
 pip install -r requirements.txt
+```
 
 For the ballistic-impact surrogate model in Case 5, PyTorch is required:
-
+```bash
 pip install torch
+```
+
 Quick start
 
 Run the one-dimensional examples:
-
+```bash
 python examples/case1_identity_1d/run_case1.py --dist all --K-list 1 2 4 8 --r-list 0 1 2 3
+```
 
 Run the five-dimensional nonlinear smooth example:
-
+```bash
 python examples/case2_5d_smooth/run_case2.py --K-list 1 2 4 8 --r-list 0 1 2 --n-its 50000
+```
 
 Run the two-dimensional four-branch example:
-
+```bash
 python examples/case3_four_branch/run_case3.py --yc 0.0
 python examples/case3_four_branch/run_case3.py --yc 2.0
+```
 
 Run the roof-truss rare-event example:
-
+```bash
 python examples/case4_roof_truss/screen_mcdiarmid.py
 python examples/case4_roof_truss/run_case4.py
+```
 
 Run the ten-dimensional ballistic-impact example:
-
+```bash
 python examples/case5_ballistic_10d/run_case5.py --yc 0.93
 python examples/case5_ballistic_10d/scan_thresholds.py
+```
 
 ## Numerical examples
 
