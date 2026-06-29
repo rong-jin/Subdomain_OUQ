@@ -10,8 +10,8 @@ This folder contains the consolidated code for the four one-dimensional identity
 Run all paper settings:
 
 ```bash
-python run_case1.py --dist all --K-list 1 2 4 8 --r-list 0 1 2 3
-python plot_case1.py --summary outputs/case1_identity_1d/case1_bounds.csv --pdfs
+python examples/case1_identity_1d/run_case1.py --dist all --K-list 1 2 4 8 --r-list 0 1 2 3
+python examples/case1_identity_1d/plot_case1.py --summary outputs/case1_identity_1d/case1_bounds.csv --pdfs
 ```
 
 `run_case1.py` writes per-distribution atoms and a combined `case1_bounds.csv` summary under `outputs/case1_identity_1d/`.
